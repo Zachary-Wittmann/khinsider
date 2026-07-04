@@ -1,78 +1,175 @@
-# khinsider.py
+# KHInsider Personal Downloader
 
-`khinsider.py` is a [Python](https://www.python.org/) interface and script for getting [khinsider](http://downloads.khinsider.com/) soundtracks. It makes khinsider mass downloads a breeze. It's easy to use - check it!
+The **KHInsider Personal Downloader** is a maintained personal fork of the original `khinsider.py` downloader. It is designed to download publicly accessible KHInsider soundtrack albums by album ID or album URL while keeping downloaded files organized under a local `downloads/` directory.
 
-From the command line (i.e. regular usage):
+This version was updated for personal use, local archival workflows, clearer Python structure, and safer repository hygiene. It is not intended as an upstream replacement or a request to merge changes back into the original project.
 
-```cmd
-khinsider.py jumping-flash
+## Current Version: **1.0.0.0**
+
+This current version supports album downloads by ID or URL, preferred audio format selection, optional image downloads, search mode, preview/list-only mode, forced re-downloads, timeout control, delay control, and output paths that remain rooted under `downloads/`.
+
+## Table of Contents
+
+1. [Project Introduction](#project-introduction)
+2. [Project Purpose](#project-purpose)
+3. [Project Contents](#project-contents)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [Command Line Options](#command-line-options)
+7. [Download Directory Behavior](#download-directory-behavior)
+8. [Examples](#examples)
+9. [Attribution](#attribution)
+
+### Project Introduction
+
+This project provides a Python-based command line downloader for KHInsider soundtrack albums. The script accepts either the album slug from a KHInsider URL or the full album URL, then downloads the available track files into a local project directory.
+
+Unlike the original script behavior, this personal version defaults all downloaded albums to the `downloads/` folder. This keeps generated album files separate from source code and prevents large audio files from being accidentally committed to version control.
+
+### Project Purpose
+
+This fork was created to keep a working, personally maintained version of the KHInsider downloader after changes to the live website made older parsing logic unreliable. The main goals of this version are:
+
+- Preserve the simple command line workflow of the original downloader.
+- Update parsing and request handling for the current KHInsider page structure.
+- Keep all downloaded albums under `downloads/` by default.
+- Add clearer CLI options for output, format preference, image handling, previewing, and re-download behavior.
+- Improve Python code organization, naming, and type hints for easier personal maintenance.
+
+### Project Contents
+
+| Filename | Type | Description |
+| --------------- | --------------- | --------------- |
+| `README` | `.md` | Project overview, setup instructions, usage examples, and maintenance notes. |
+| `khinsider` | `.py` | Main downloader script. Downloads albums by ID or URL and supports CLI options such as output, format, search, image toggles, and list-only mode. |
+| `requirements` | `.txt` | Python dependency list used to install the packages required by the downloader. |
+| `.gitignore` | file | Recommended ignore file for excluding `downloads/`, Python caches, virtual environments, and other local-only files. |
+| `downloads` | directory | Local output folder created/used by the downloader. This should not be committed to Git. |
+
+### Installation
+
+Clone or download this repository, then install the Python requirements:
+
+```bash
+python -m pip install -r requirements.txt
 ```
 
-As an import (for when you're programming):
+The project requires Python 3.9 or newer.
 
-```python
-import khinsider
-khinsider.download('jumping-flash')
-# And bam, you've got the Jumping Flash soundtrack!
+### Usage
+
+The basic command format is:
+
+```bash
+python khinsider.py <album-id-or-url> [options]
 ```
 
-For anime music, [check out `thehylia.py`](https://github.com/obskyr/thehylia).
+For example:
 
-Carefully put together by [@obskyr](http://twitter.com/obskyr)!
-
-### **[Download it here!](https://github.com/obskyr/khinsider/archive/master.zip)**
-
-## Usage
-
-Just run `khinsider.py` from the command line with the sole parameter being the soundtrack you want to download. You can either use the soundtrack's ID, or simply copy its entire URL. Easy!
-
-If you want, you can also add another parameter as the output folder, but that's optional.
-
-You can also download other file formats (if available), like FLAC or OGG, as following:
-
-```cmd
-khinsider.py --format flac mother-3
+```bash
+python khinsider.py minecraft
 ```
 
-If you don't want to go to the actual site to look for soundtracks, you can also just type a search term as the first parameter(s), and provided it's not a valid soundtrack, `khinsider.py` will give you a list of soundtracks matching that term.
+or:
 
-You're going to need [Python](https://www.python.org/downloads/) (if you don't know which version to get, choose the latest version of Python 3 - `khinsider.py` works with both 2 and 3), so install that (and [add it to your path](http://superuser.com/a/143121)) if you haven't already.
+```bash
+python khinsider.py https://downloads.khinsider.com/game-soundtracks/album/minecraft
+```
 
-You will also need to have [pip](https://pip.readthedocs.org/en/latest/installing.html) installed (if you have Python 3, it is most likely already installed - otherwise, download `get-pip.py` and run it) if you don't already have [requests](https://pypi.python.org/pypi/requests) and [Beautiful Soup 4](https://pypi.python.org/pypi/beautifulsoup4). The first time `khinsider.py` runs, it will install these two for you.
+By default, the album is downloaded under:
 
-For more detailed information, try running `khinsider.py --help`!
+```text
+downloads/<album-name-or-output-name>/
+```
 
-## As a module
+### Command Line Options
 
-`khinsider.py` requires two non-standard modules: [requests](https://pypi.python.org/pypi/requests) and [beautifulsoup4](https://pypi.python.org/pypi/beautifulsoup4). Just run a `pip install` on them (with [pip](https://pip.readthedocs.org/en/latest/installing.html)), or just run `khinsider.py` on its own once and it'll install them for you.
+| Option | Description |
+| --------------- | --------------- |
+| `-o`, `--output DIR` | Sets the album output subdirectory under `downloads/`. |
+| `-f`, `--format LIST` | Sets preferred audio formats in priority order, such as `flac,mp3`. |
+| `-s`, `--search` | Searches for albums/songs instead of downloading immediately. |
+| `-i`, `--images` | Enables album image downloads. Images are enabled by default. |
+| `--no-images` | Skips album image downloads. |
+| `-v`, `--verbose` | Enables progress output. Verbose output is enabled by default. |
+| `--no-verbose` | Reduces progress/status output. |
+| `--force` | Re-downloads files even if they already exist. |
+| `--list-only` | Shows what would be downloaded without writing files. |
+| `--timeout SECONDS` | Sets the HTTP timeout value. |
+| `--delay SECONDS` | Adds a delay between sequential downloads. |
+| `--version` | Prints the script version and exits. |
+| `-h`, `--help` | Shows help information. |
 
-Here are the main functions you will be using:
+### Download Directory Behavior
 
-### `khinsider.download(soundtrackName[, path="", makeDirs=True, formatOrder=None, verbose=False])`
+This version intentionally keeps all album output inside the repository-local `downloads/` folder.
 
-Download the soundtrack `soundtrackName`. This should be the name the soundtrack uses at the end of its album URL.
+For example:
 
-If `path` is specified, the soundtrack files will be downloaded to the directory that path points to.
+```bash
+python khinsider.py minecraft -o "Minecraft OST"
+```
 
-If `makeDirs` is `True`, the directory will be created if it doesn't exist.
+will save files under:
 
-You can specify `formatOrder` to download soundtracks in specific formats. `formatOrder=['flac', 'mp3']`, for example, will download FLACs if available, and MP3s if not.
+```text
+downloads/Minecraft OST/
+```
 
-If `verbose` is `True`, it will print progress as it is downloading.
+The `-o` or `--output` value is treated as a subdirectory name under `downloads/`, not as a free-form path outside the project. This helps keep downloaded albums predictable and makes the `.gitignore` easier to manage.
 
-### `khinsider.search(term)`
+### Examples
 
-Search khinsider for `term`. Return a list of `Soundtrack`s matching the search term. You can then access `soundtrack.id` or `soundtrack.url`.
+Download an album by ID:
 
-### More
+```bash
+python khinsider.py plants-vs.-zombies
+```
 
-There's a lot more detail to the API - more than would be sensible to write here. If you want to use `khinsider.py` as a module in a more advanced capacity, have a look at the `Soundtrack`, `Song`, and `File` objects in the source code! They're documented properly there for your reading pleasure.
+Download an album by full URL:
 
-# Talk to me!
+```bash
+python khinsider.py https://downloads.khinsider.com/game-soundtracks/album/plants-vs.-zombies
+```
 
-You can easily get to me in these ways:
+Prefer FLAC, but fall back to MP3 if FLAC is unavailable:
 
-* [@obskyr](http://twitter.com/obskyr/) on Twitter!
-* [E-mail](mailto:powpowd@gmail.com) me!
+```bash
+python khinsider.py minecraft -f flac,mp3
+```
 
-I'd love to hear it if you like `khinsider.py`! If there's a problem, or you'd like a new feature, submit an issue here on GitHub.
+Choose a custom output folder under `downloads/`:
+
+```bash
+python khinsider.py minecraft -o "Minecraft OST"
+```
+
+Search instead of downloading:
+
+```bash
+python khinsider.py -s persona
+```
+
+Preview files without downloading:
+
+```bash
+python khinsider.py minecraft --list-only
+```
+
+Skip album images:
+
+```bash
+python khinsider.py minecraft --no-images
+```
+
+Force a re-download of existing files:
+
+```bash
+python khinsider.py minecraft --force
+```
+
+### Attribution
+
+This project is a personal maintenance fork based on the original `khinsider.py` project by `obskyr`. The goal of this repository is personal use and local maintenance, not upstream replacement.
+
+The original project concept, public KHInsider downloader workflow, and earlier interface ideas belong to the original project. This fork updates the downloader behavior, CLI ergonomics, code organization, and local output handling for a personal repository workflow.
